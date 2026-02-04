@@ -1,12 +1,11 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import useSWR, { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
+import { useState,useEffect } from "react";
+import type { Attachment, ChatMessage } from "@/lib/types";
+import type { VisibilityType } from "./visibility-selector";
+import { ChatStatus } from "ai";
 
+import { ListingsCarousel } from "@/components/listings-carousel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,20 +16,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useArtifactSelector } from "@/hooks/use-artifact";
-import { useAutoResume } from "@/hooks/use-auto-resume";
-import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import type { Vote } from "@/lib/db/schema";
-import { ChatSDKError } from "@/lib/errors";
-import type { Attachment, ChatMessage } from "@/lib/types";
-import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+
 import { Artifact } from "./artifact";
-import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
-import { getChatHistoryPaginationKey } from "./sidebar-history";
-import { toast } from "./toast";
-import type { VisibilityType } from "./visibility-selector";
 
 export function Chat({
   id,
@@ -38,237 +27,226 @@ export function Chat({
   initialChatModel,
   initialVisibilityType,
   isReadonly,
-  autoResume,
 }: {
   id: string;
   initialMessages: ChatMessage[];
   initialChatModel: string;
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
-  autoResume: boolean;
 }) {
-  const router = useRouter();
-
-  const { visibilityType } = useChatVisibility({
-    chatId: id,
-    initialVisibilityType,
-  });
-
-  const { mutate } = useSWRConfig();
-
-  // Handle browser back/forward navigation
-  useEffect(() => {
-    const handlePopState = () => {
-      // When user navigates back/forward, refresh to sync with URL
-      router.refresh();
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [router]);
-  const { setDataStream } = useDataStream();
-
-  const [input, setInput] = useState<string>("");
-  const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
-  const [currentModelId, setCurrentModelId] = useState(initialChatModel);
-  const currentModelIdRef = useRef(currentModelId);
-
-  useEffect(() => {
-    currentModelIdRef.current = currentModelId;
-  }, [currentModelId]);
-
-  const {
-    messages,
-    setMessages,
-    sendMessage,
-    status,
-    stop,
-    regenerate,
-    resumeStream,
-    addToolApprovalResponse,
-  } = useChat<ChatMessage>({
-    id,
-    messages: initialMessages,
-    generateId: generateUUID,
-    sendAutomaticallyWhen: ({ messages: currentMessages }) => {
-      const lastMessage = currentMessages.at(-1);
-      const shouldContinue =
-        lastMessage?.parts?.some(
-          (part) =>
-            "state" in part &&
-            part.state === "approval-responded" &&
-            "approval" in part &&
-            (part.approval as { approved?: boolean })?.approved === true
-        ) ?? false;
-      return shouldContinue;
-    },
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      fetch: fetchWithErrorHandlers,
-      prepareSendMessagesRequest(request) {
-        const lastMessage = request.messages.at(-1);
-        const isToolApprovalContinuation =
-          lastMessage?.role !== "user" ||
-          request.messages.some((msg) =>
-            msg.parts?.some((part) => {
-              const state = (part as { state?: string }).state;
-              return (
-                state === "approval-responded" || state === "output-denied"
-              );
-            })
-          );
-
-        return {
-          body: {
-            id: request.id,
-            ...(isToolApprovalContinuation
-              ? { messages: request.messages }
-              : { message: lastMessage }),
-            selectedChatModel: currentModelIdRef.current,
-            selectedVisibilityType: visibilityType,
-            ...request.body,
-          },
-        };
-      },
-    }),
-    onData: (dataPart) => {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-    },
-    onFinish: () => {
-      mutate(unstable_serialize(getChatHistoryPaginationKey));
-    },
-    onError: (error) => {
-      if (error instanceof ChatSDKError) {
-        if (
-          error.message?.includes("AI Gateway requires a valid credit card")
-        ) {
-          setShowCreditCardAlert(true);
-        } else {
-          toast({
-            type: "error",
-            description: error.message,
-          });
-        }
-      }
-    },
-  });
-
-  const searchParams = useSearchParams();
-  const query = searchParams.get("query");
-
-  const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
-
-  useEffect(() => {
-    if (query && !hasAppendedQuery) {
-      sendMessage({
-        role: "user" as const,
-        parts: [{ type: "text", text: query }],
-      });
-
-      setHasAppendedQuery(true);
-      window.history.replaceState({}, "", `/chat/${id}`);
-    }
-  }, [query, sendMessage, hasAppendedQuery, id]);
-
-  const { data: votes } = useSWR<Vote[]>(
-    messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
-    fetcher
-  );
-
+  /* ---------------- UI STATE ONLY ---------------- */
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+  const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+  const [showListings, setShowListings] = useState(false);
+  const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
+   const status: ChatStatus = "ready"; 
+   const addToolApprovalResponse = async () => {};
+const regenerate = async () => {};
 
-  useAutoResume({
-    autoResume,
-    initialMessages,
-    resumeStream,
-    setMessages,
-  });
+const selectedModelId = initialChatModel;
+const stop = async () => {};
+const votes: { chatId: string; messageId: string; isUpvoted: boolean }[] = [];
+const selectedVisibilityType = initialVisibilityType; // UI stub
+
+
+  /* ---------------- NO-OP UI HANDLERS ---------------- */
+
+  const sendMessage = async (
+  message?: {
+    role?: "user" | "assistant" | "system";
+    parts?: ChatMessage["parts"];
+    text?: string;
+  }
+) => {
+  if (!message) return;
+
+  const text =
+    message.text ??
+    message.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => p.text)
+      .join(" ") ??
+    "";
+
+  const lower = text.toLowerCase();
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      id: crypto.randomUUID(),
+      role: message.role ?? "user",
+      parts:
+        message.parts ??
+        (message.text
+          ? [{ type: "text", text: message.text }]
+          : []),
+    },
+  ]);
+
+  if (
+    lower.includes("show") &&
+    (lower.includes("product") ||
+      lower.includes("products") ||
+      lower.includes("listing"))
+  ) {
+    setShowListings(true);
+    addAssistantMessage("Here are some products you might like 👇");
+    return;
+  }
+
+  if (lower.includes("hide") || lower.includes("close")) {
+    setShowListings(false);
+    addAssistantMessage("I’ve hidden the listings. What would you like to do next?");
+    return;
+  }
+
+  addAssistantMessage("Hi 😊 What can I help you with today?");
+};
+
+function addAssistantMessage(text: string) {
+  setMessages((prev) => [
+    ...prev,
+    {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: text,
+      parts: [{ type: "text", text }],
+    },
+  ]);
+}
+
+
+function getMessageText(message?: ChatMessage): string {
+  if (!message) return "";
+
+  // Runtime check for ai-sdk injected content
+  if (
+    typeof (message as unknown as { content?: unknown }).content === "string"
+  ) {
+    return (message as unknown as { content: string }).content;
+  }
+
+  // Fallback to typed parts
+  return (
+    message.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => p.text)
+      .join(" ") ?? ""
+  );
+}
+
+const lastUserMessage = [...messages]
+  .reverse()
+  .find((m) => m.role === "user");
+
+const lastUserText = getMessageText(lastUserMessage).toLowerCase();
+
+
+
+
+
+
+useEffect(() => {
+  if (!lastUserText) return;
+
+  if (
+    lastUserText.includes("show") &&
+    (lastUserText.includes("product") ||
+      lastUserText.includes("products") ||
+      lastUserText.includes("listing"))
+  ) {
+    setShowListings(true);
+  }
+
+  if (
+    lastUserText.includes("hide") ||
+    lastUserText.includes("close")
+  ) {
+    setShowListings(false);
+  }
+}, [lastUserText]);
+
+
+
+
 
   return (
     <>
-      <div className="overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background">
-        
+      <div className="flex h-dvh min-w-0 flex-col bg-background">
+        {showListings && (
+          <div className="mx-auto w-full max-w-4xl px-2 pt-3 md:px-4">
+            <ListingsCarousel />
+          </div>
+        )}
 
         <Messages
-          addToolApprovalResponse={addToolApprovalResponse}
           chatId={id}
-          isArtifactVisible={isArtifactVisible}
+          isArtifactVisible={false}
           isReadonly={isReadonly}
           messages={messages}
-          regenerate={regenerate}
-          selectedModelId={initialChatModel}
           setMessages={setMessages}
           status={status}
+           addToolApprovalResponse={addToolApprovalResponse}
           votes={votes}
+          regenerate={regenerate}
+          selectedModelId={selectedModelId}
         />
 
-        <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
+        <div className="sticky bottom-0 mx-auto flex w-full max-w-4xl gap-2 bg-background px-2 pb-3 md:px-4 md:pb-4">
           {!isReadonly && (
             <MultimodalInput
-              attachments={attachments}
               chatId={id}
               input={input}
               messages={messages}
-              onModelChange={setCurrentModelId}
-              selectedModelId={currentModelId}
-              selectedVisibilityType={visibilityType}
-              sendMessage={sendMessage}
-              setAttachments={setAttachments}
+              attachments={attachments}
               setInput={setInput}
               setMessages={setMessages}
+              setAttachments={setAttachments}
+              sendMessage={sendMessage}
               status={status}
-              stop={stop}
+              stop={stop} 
+  selectedVisibilityType={selectedVisibilityType} 
+  selectedModelId={selectedModelId}
             />
           )}
         </div>
       </div>
 
-      <Artifact
-        addToolApprovalResponse={addToolApprovalResponse}
-        attachments={attachments}
-        chatId={id}
-        input={input}
-        isReadonly={isReadonly}
-        messages={messages}
-        regenerate={regenerate}
-        selectedModelId={currentModelId}
-        selectedVisibilityType={visibilityType}
-        sendMessage={sendMessage}
-        setAttachments={setAttachments}
-        setInput={setInput}
-        setMessages={setMessages}
-        status={status}
-        stop={stop}
-        votes={votes}
-      />
+     <Artifact
+  chatId={id}
+  input={input}
+  messages={messages}
+  attachments={attachments}
+  isReadonly={isReadonly}
+  selectedModelId={selectedModelId}
+  selectedVisibilityType={initialVisibilityType}
+  sendMessage={sendMessage}
+  setInput={setInput}
+  setMessages={setMessages}
+  setAttachments={setAttachments}
+  status={status}
+  addToolApprovalResponse={addToolApprovalResponse}
+  regenerate={regenerate}
+  stop={stop}
+  votes={votes}
+/>
+
 
       <AlertDialog
-        onOpenChange={setShowCreditCardAlert}
         open={showCreditCardAlert}
+        onOpenChange={setShowCreditCardAlert}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Activate AI Gateway</AlertDialogTitle>
             <AlertDialogDescription>
-              This application requires{" "}
-              {process.env.NODE_ENV === "production" ? "the owner" : "you"} to
-              activate Vercel AI Gateway.
+              Please activate Vercel AI Gateway to continue.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                window.open(
-                  "https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card",
-                  "_blank"
-                );
-                window.location.href = "/";
-              }}
-            >
-              Activate
-            </AlertDialogAction>
+            <AlertDialogAction>Activate</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

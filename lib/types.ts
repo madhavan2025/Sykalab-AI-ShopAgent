@@ -16,6 +16,19 @@ export const messageMetadataSchema = z.object({
 
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
+export type CarouselItem = {
+  id?: string;
+  title: string;
+  description?: string;
+  image?: string;
+  price?: string;
+  rating?: number;
+  action?: {
+    label: string;
+    value: string;
+  };
+};
+
 
 type weatherTool = InferUITool<typeof getWeather>;
 type createDocumentTool = InferUITool<ReturnType<typeof createDocument>>;
@@ -44,6 +57,25 @@ export type CustomUIDataTypes = {
   clear: null;
   finish: null;
   "chat-title": string;
+
+   carousel?: {
+    items: CarouselItem[];
+  };
+
+  listing?: {
+    heading?: string;
+    items: CarouselItem[];
+  };
+
+  buttons?: {
+    label: string;
+    value: string;
+  }[];
+
+  image?: {
+    url: string;
+    alt?: string;
+  };
 };
 
 export type ChatMessage = UIMessage<

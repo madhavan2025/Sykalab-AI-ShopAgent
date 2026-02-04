@@ -20,7 +20,7 @@
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.15",
     "@ai-sdk/provider": "^3.0.3",
-    "@ai-sdk/react": "3.0.39",
+    "@ai-sdk/react": "^3.0.69",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-python": "^6.1.6",
     "@codemirror/state": "^6.5.0",
@@ -47,7 +47,7 @@
     "@vercel/functions": "^2.0.0",
     "@vercel/otel": "^1.12.0",
     "@xyflow/react": "^12.10.0",
-    "ai": "6.0.37",
+    "ai": "^6.0.67",
     "bcrypt-ts": "^5.0.2",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
@@ -81,9 +81,8 @@
     "prosemirror-view": "^1.34.3",
     "radix-ui": "^1.4.3",
     "react": "18.3.1",
-   "react-dom": "18.3.1",
     "react-data-grid": "7.0.0-beta.47",
-  
+    "react-dom": "18.3.1",
     "react-resizable-panels": "^2.1.7",
     "react-syntax-highlighter": "^16.1.0",
     "redis": "^5.0.0",
