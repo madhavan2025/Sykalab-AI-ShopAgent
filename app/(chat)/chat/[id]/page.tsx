@@ -28,7 +28,7 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <Chat
-        autoResume
+       autoResume={true}
         id={id}
         initialChatModel={chatModelFromCookie?.value ?? DEFAULT_CHAT_MODEL}
         initialMessages={uiMessages}

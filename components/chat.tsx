@@ -27,12 +27,14 @@ export function Chat({
   initialChatModel,
   initialVisibilityType,
   isReadonly,
+  autoResume = false, // ✅ default value goes here
 }: {
   id: string;
   initialMessages: ChatMessage[];
   initialChatModel: string;
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
+  autoResume?: boolean; // ✅ optional in type
 }) {
   /* ---------------- UI STATE ONLY ---------------- */
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);

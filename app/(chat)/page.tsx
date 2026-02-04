@@ -36,6 +36,7 @@ export default async function Page({
   initialVisibilityType="public"
   isReadonly={false}
   autoResume={true}
+ 
           />
         </div>
         </div>
