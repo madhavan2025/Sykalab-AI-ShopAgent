@@ -43,7 +43,7 @@ export const FloatingChat: React.FC<FloatingChatProps> = ({
           className="flex items-center justify-center"
         >
          <Image
-  src="/images/speech-bubble.png"
+  src="/images/comment.png"
   alt="Chat"
   width={60}
   height={60}
@@ -58,10 +58,11 @@ export const FloatingChat: React.FC<FloatingChatProps> = ({
       {isOpen && (
         <div className="w-[360px] h-[520px] bg-white border rounded-xl shadow-xl flex flex-col overflow-hidden">
           {/* Header */}
-         <div className="flex items-center justify-between px-4 py-3 bg-black text-white">
+       <div className="flex items-center justify-between px-4 py-3 bg-[#6FA8E8] text-white">
   <span className="font-semibold">Chatbot</span>
   <button onClick={() => setIsOpen(false)}>✕</button>
 </div>
+
 
 
           {/* Chat Body */}

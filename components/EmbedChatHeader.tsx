@@ -6,7 +6,7 @@ export function EmbedChatHeader() {
   };
 
   return (
-    <div className="h-14 bg-black text-white flex items-center justify-between px-4 shrink-0">
+    <div className="h-14 bg-[#6FA8E8] text-white flex items-center justify-between px-4 shrink-0">
       <span className="font-semibold">Chatbot</span>
       <button
         onClick={closeChat}
