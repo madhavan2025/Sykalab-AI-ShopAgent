@@ -56,6 +56,7 @@ const stop = async () => {};
 const votes: { chatId: string; messageId: string; isUpvoted: boolean }[] = [];
 const selectedVisibilityType = initialVisibilityType; // UI stub
 
+const [listingType, setListingType] = useState<"type1" | "type2" | null>(null);
 
   /* ---------------- NO-OP UI HANDLERS ---------------- */
 
@@ -91,16 +92,31 @@ const selectedVisibilityType = initialVisibilityType; // UI stub
     },
   ]);
 
-  if (
-    lower.includes("show") &&
-    (lower.includes("product") ||
-      lower.includes("products") ||
-      lower.includes("listing"))
-  ) {
-    setShowListings(true);
-    addAssistantMessage("Here are some products you might like 👇");
-    return;
-  }
+ if (lower.includes("show products type1")) {
+  setListingType("type1");
+  setShowListings(true);
+  setShowContentList(false);
+  setShowForm(false);
+  addAssistantMessage("Here is a product you might like 👇");
+  return;
+}
+
+if (lower.includes("show products type2")) {
+  setListingType("type2");
+  setShowListings(true);
+  setShowContentList(false);
+  setShowForm(false);
+  addAssistantMessage("Here are some products you might like 👇");
+  return;
+}
+
+if (lower.includes("show contents")) {
+  setShowListings(false);
+  setShowContentList(true);
+  setShowForm(false);
+  addAssistantMessage("Here are some contents 👇");
+  return;
+}
   
    if (lower.includes("show") && (lower.includes("form") || lower.includes("forms"))) {
     setShowForm(true);
@@ -179,6 +195,7 @@ useEffect(() => {
   ) {
     setShowListings(false);
     setShowForm(false);
+     setShowContentList(false);
   }
 }, [lastUserText]);
 
@@ -195,13 +212,16 @@ useEffect(() => {
    
 <div className="flex-1 overflow-y-auto min-h-0">
    <>
-            {showListings && (
-              <div className="px-2 pt-3 space-y-3">
-                <ListingsCarousel />
-                <ContentListing />
-              </div>
-            )}
+            {showListings && listingType && (
+  <div className="px-2 pt-3 space-y-3">
+    <ListingsCarousel type={listingType} />
+  </div>
+)}
 
+{showContentList && (
+   <div className="px-2 pt-3">
+<ContentListing />
+</div>)}
             {showForm && (
               <div className="px-2 pt-3">
                 <MiniForm />
