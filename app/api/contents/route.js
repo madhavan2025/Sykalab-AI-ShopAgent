@@ -8,7 +8,7 @@ export async function GET() {
 
     const contents = await db.collection("contents").find({}).toArray();
 
-    return NextResponse.json(contents || []);
+    return NextResponse.json(contents);
   } catch (err) {
     console.error("Failed to fetch contents:", err);
     return NextResponse.json({ error: "Failed to fetch contents" }, { status: 500 });
