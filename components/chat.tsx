@@ -36,6 +36,14 @@ async function getForm(id: string) {
   return res.json();
 }
 
+async function getContents() {
+  const res = await fetch("/api/contents");
+  if (!res.ok) throw new Error("Failed to fetch contents");
+  return res.json();
+}
+
+
+
 export function Chat({
   id,
   initialMessages,
@@ -84,6 +92,9 @@ useEffect(() => {
 
         const fetchedForm = await getForm("contactForm");
         setFormConfig(fetchedForm);
+
+        const fetchedContents = await getContents();   // ✅ ADD THIS
+      setContents(fetchedContents); 
       } catch (error) {
         console.error("Failed to fetch products or form:", error);
       }
