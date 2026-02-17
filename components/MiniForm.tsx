@@ -146,7 +146,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       ))}
         <button
         type="submit"
-        className="w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+        className="w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800 cursor-pointer"
         disabled={loading}
       >
         {loading ? "Submitting..." : config.submitLabel}

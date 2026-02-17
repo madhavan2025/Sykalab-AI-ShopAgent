@@ -24,11 +24,7 @@ import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 
 
-async function getProducts() {
-  const res = await fetch("/api/products");
-  if (!res.ok) throw new Error("Failed to fetch products");
-  return res.json();
-}
+
 
 async function getForm(id: string) {
   const res = await fetch(`/api/forms/${id}`);
@@ -50,7 +46,6 @@ export function Chat({
   initialChatModel,
   initialVisibilityType,
   isReadonly,
-  autoResume = false, // ✅ default value goes here
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -66,7 +61,7 @@ export function Chat({
   const [showListings, setShowListings] = useState(false);
   const [showContentList, setShowContentList] = useState(false);
   const [showForm, setShowForm] = useState(false);
-    const [products, setProducts] = useState<any[]>([]);
+    
       const [formConfig, setFormConfig] = useState<any>(null);
       const [contents, setContents] = useState<any[]>([]);
 
@@ -87,8 +82,6 @@ const [listingType, setListingType] = useState<"type1" | "type2" | null>(null);
 useEffect(() => {
     async function fetchData() {
       try {
-        const fetchedProducts = await getProducts();
-        setProducts(fetchedProducts);
 
         const fetchedForm = await getForm("contactForm");
         setFormConfig(fetchedForm);
@@ -259,21 +252,21 @@ useEffect(() => {
 
   return (
     <>
-<div className="flex h-full min-w-0 flex-col bg-background">
+<div className="flex h-full min-w-0 flex-col ">
   
   
    
    
 <div className="flex-1 overflow-y-auto min-h-0">
    <>
-            {showListings && listingType && products.length > 0 && (
+  {showListings && listingType && (
   <div className="px-2 pt-3 space-y-3">
-     <ListingsCarousel
-      products={products}
-      style={listingType}
+    <ListingsCarousel
+      style={listingType} // type1 or type2
     />
   </div>
 )}
+
 
 {showContentList && (
    <div className="px-2 pt-3">
@@ -311,7 +304,8 @@ useEffect(() => {
 
   {/* Sticky input */}
   {!isReadonly && (
-    <div className="sticky bottom-0 mx-auto w-full max-w-4xl bg-background px-2 pb-3 md:px-4 md:pb-4">
+    <div className="sticky bottom-0 mx-auto w-full max-w-4xl  px-2 pb-3 md:px-4 md:pb-4"
+    >
       <MultimodalInput
         chatId={id}
         input={input}

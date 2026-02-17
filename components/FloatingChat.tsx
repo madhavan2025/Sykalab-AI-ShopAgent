@@ -67,7 +67,7 @@ if (loadingTheme) return null;
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center justify-center"
+          className="flex items-center justify-center cursor-pointer"
         >
   {theme?.chatIcon && (
   <Image
@@ -96,7 +96,7 @@ if (loadingTheme) return null;
       {/* Floating Chat */}
       {isOpen && (
        <div
-  className={`flex flex-col overflow-hidden transition-all duration-300
+  className={`flex flex-col overflow-hidden transition-all duration-300 
     ${
       isFullScreen
         ? "fixed inset-0"
@@ -104,10 +104,10 @@ if (loadingTheme) return null;
     }
   `}
   style={{
-    backgroundColor: theme?.windowBg,
-    border: `1px solid ${theme?.borderColor}`,
-    borderRadius: isFullScreen ? "0px" : theme?.borderRadius,
-    boxShadow: theme?.shadow
+    backgroundColor: theme.windowBg,
+    border: theme.borderColor,
+    borderRadius: theme.borderRadius,
+    boxShadow: theme.shadow
   }}
 >
 
@@ -126,7 +126,7 @@ if (loadingTheme) return null;
               {/* Expand / Minimize Button */}
               <button
                 onClick={() => setIsFullScreen(!isFullScreen)}
-                className="hover:opacity-80"
+                className="hover:opacity-80 cursor-pointer"
               >
                 {isFullScreen ? (
                   <Minimize2 size={18} />
@@ -134,7 +134,7 @@ if (loadingTheme) return null;
                   <Maximize2 size={18} />
                 )}
               </button>
-  <button onClick={() => setIsOpen(false)}>✕</button>
+  <button className="cursor-pointer" onClick={() => setIsOpen(false)}>✕</button>
 </div>
 </div>
 

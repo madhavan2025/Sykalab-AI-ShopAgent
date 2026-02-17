@@ -35,7 +35,7 @@ export function ContentListing({ items, count }: ContentListingProps) {
           <button
             type="button"
             onClick={() => router.push(`/product/${item.id}`)}
-            className="mt-1 text-xs font-semibold text-blue-600 hover:underline"
+            className="mt-1 text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
           >
             View more →
           </button>

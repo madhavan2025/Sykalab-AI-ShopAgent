@@ -11,20 +11,15 @@ type Listing = {
   image: string;
   description: string;
 };
-
 type ListingsCarouselProps = {
-  products: Listing[];
-  style: "type1" | "type2";
+  style?: "type1" | "type2";
 };
 
-export function ListingsCarousel({
-  products,
-  style,
-}: ListingsCarouselProps) {
+export function ListingsCarousel({ style = "type1" }: ListingsCarouselProps) {
   const [index, setIndex] = useState(0);
   const [addedItems, setAddedItems] = useState<Record<string, boolean>>({});
   const [justAdded, setJustAdded] = useState<Record<string, boolean>>({});
-
+  const [products, setProducts] = useState<any[]>([]);
   const visibleCount = style === "type1" ? 1 : 2;
   const total = products.length;
 
@@ -34,9 +29,8 @@ export function ListingsCarousel({
   const next = () => setIndex((i) => (i + visibleCount) % total);
   const prev = () => setIndex((i) => (i - visibleCount + total) % total);
 
-  const visibleListings = Array.from({ length: visibleCount }, (_, i) =>
-    products[(index + i) % total]
-  );
+ const visibleListings = products.slice(index, index + visibleCount);
+
 
   const handleClick = (listing: Listing) => {
     router.push(`/product/${listing.id}`);
@@ -47,29 +41,47 @@ export function ListingsCarousel({
   }, [style]);
 
   const handleAddToCart = (listing: Listing) => {
-    addToCart(listing);
+  // Add this product only to the cart
+  addToCart(listing);
 
-    setJustAdded((prev) => ({
-      ...prev,
-      [listing.id]: true,
-    }));
+  // Show "Added ✓" for this product
+  setJustAdded((prev) => ({ ...prev, [listing.id]: true }));
 
-    setTimeout(() => {
-      setJustAdded((prev) => ({
-        ...prev,
-        [listing.id]: false,
-      }));
+  // After 3 seconds, hide "Added ✓" and allow "View Cart"
+  setTimeout(() => {
+    setJustAdded((prev) => ({ ...prev, [listing.id]: false }));
+    setAddedItems((prev) => ({ ...prev, [listing.id]: true }));
+  }, 3000);
+};
 
-      setAddedItems((prev) => ({
-        ...prev,
-        [listing.id]: true,
-      }));
-    }, 3000);
-  };
+
+    async function getProducts() {
+  const res = await fetch("/api/products");
+  if (!res.ok) throw new Error("Failed to fetch products");
+  return res.json();
+}
+
+useEffect(() => {
+    async function fetchData() {
+      try {
+        const fetchedProducts = await getProducts();
+        setProducts(fetchedProducts);
+
+       
+      } catch (error) {
+        console.error("Failed to fetch products or form:", error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   if (!products || products.length === 0) {
     return <div>No products available</div>;
   }
+
+
+
 
   const renderType1 = () => (
     <div className="grid grid-cols-1 gap-4">
@@ -85,7 +97,7 @@ export function ListingsCarousel({
 
            <button
     onClick={prev}
-    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition"
+    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition cursor-pointer"
     aria-label="Previous"
   >
     <svg
@@ -103,7 +115,7 @@ export function ListingsCarousel({
   {/* Next */}
   <button
     onClick={next}
-    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition"
+    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition cursor-pointer"
     aria-label="Next"
   >
     <svg
@@ -132,14 +144,14 @@ export function ListingsCarousel({
           ) : addedItems[listing.id] ? (
             <button
               onClick={() => router.push("/cart")}
-              className="mt-2 w-full text-xs underline"
+              className="mt-2 w-full text-xs underline cursor-pointer"
             >
               View cart
             </button>
           ) : (
             <button
               onClick={() => handleAddToCart(listing)}
-              className="mt-2 w-full bg-black text-white py-2 rounded-md"
+              className="mt-2 w-full bg-black text-white py-2 rounded-md cursor-pointer"
             >
               Add to cart
             </button>
@@ -149,11 +161,15 @@ export function ListingsCarousel({
     </div>
   );
 
-  const renderType2 = () => (
+  const renderType2 = () => {
+
+
+
+  return(
      <div className="relative group">
        <button
     onClick={prev}
-    className="absolute left-2 top-20 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition"
+    className="absolute left-2 top-20 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition cursor-pointer"
     aria-label="Previous"
   >
     <svg
@@ -171,7 +187,7 @@ export function ListingsCarousel({
   {/* Next */}
   <button
     onClick={next}
-    className="absolute right-2 top-20 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition"
+    className="absolute right-2 top-20 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition cursor-pointer"
     aria-label="Next"
   >
     <svg
@@ -218,14 +234,14 @@ export function ListingsCarousel({
           ) : addedItems[listing.id] ? (
             <button
               onClick={() => router.push("/cart")}
-              className="mt-2 w-full text-xs underline text-black hover:text-gray-700"
+              className="mt-2 w-full text-xs underline text-black hover:text-gray-700 cursor-pointer"
             >
               View cart
             </button>
           ) : (
             <button
               onClick={() => handleAddToCart(listing)}
-              className="mt-2 w-full bg-black text-white py-2 rounded-md hover:bg-blue-700 transition"
+              className="mt-2 w-full bg-black text-white py-2 rounded-md cursor-pointer"
             >
               Add to cart
             </button>
@@ -236,7 +252,7 @@ export function ListingsCarousel({
     </div>
     </div>
   );
-
+  };
   return (
     <div className="w-full max-w-4xl p-4 bg-white rounded-xl border">
       <h3 className="mb-3 text-sm font-semibold text-gray-500">
