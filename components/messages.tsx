@@ -18,7 +18,6 @@ type MessagesProps = {
   isReadonly: boolean;
   isArtifactVisible: boolean;
   selectedModelId: string;
-  theme:any;
 };
 
 function PureMessages({
@@ -31,7 +30,6 @@ function PureMessages({
   regenerate,
   isReadonly,
   selectedModelId: _selectedModelId,
-  theme,
 }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -52,7 +50,7 @@ function PureMessages({
         ref={messagesContainerRef}
       >
         <div className="mx-auto flex min-w-0 max-w-4xl flex-col gap-4 px-2 py-4 md:gap-6 md:px-4">
-          {messages.length === 0 && <Greeting theme={theme} />}
+          {messages.length === 0 && <Greeting />}
 
           {messages.map((message, index) => (
             <PreviewMessage

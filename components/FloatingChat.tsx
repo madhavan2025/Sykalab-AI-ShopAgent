@@ -166,7 +166,7 @@ if (loadingTheme) return null;
           initialVisibilityType={initialVisibilityType}
           isReadonly={isReadonly}
           autoResume={autoResume}
-          theme={theme}
+          
         />
       </div>
     </div>
