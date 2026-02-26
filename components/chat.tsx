@@ -23,9 +23,6 @@ import { Artifact } from "./artifact";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 
-
-
-
 async function getForm(id: string) {
   const res = await fetch(`/api/forms/${id}`);
   if (!res.ok) throw new Error("Failed to fetch form");
@@ -37,15 +34,13 @@ async function getContents() {
   if (!res.ok) throw new Error("Failed to fetch contents");
   return res.json();
 }
-
-
-
 export function Chat({
   id,
   initialMessages,
   initialChatModel,
   initialVisibilityType,
   isReadonly,
+  theme,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -53,6 +48,7 @@ export function Chat({
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
   autoResume?: boolean; // ✅ optional in type
+  theme:any;
 }) {
   /* ---------------- UI STATE ONLY ---------------- */
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
@@ -192,9 +188,6 @@ if (lower.includes("show contents")) {
 };
 
 
-
-
-
 function getMessageText(message?: ChatMessage): string {
   if (!message) return "";
 
@@ -247,20 +240,11 @@ useEffect(() => {
 }, [lastUserText]);
 
 
-
-
-
   return (
     <>
-<div className="flex h-full min-w-0 flex-col items-center ">
-  
-  
-   
-   
+<div className="flex h-full min-h-0 flex-col items-center "> 
 <div className="flex-1 overflow-y-auto min-h-0">
   <div className="mx-auto w-full max-w-4xl flex flex-col">
-      
-
   <Messages
     chatId={id}
     isArtifactVisible={false}
@@ -272,6 +256,7 @@ useEffect(() => {
     votes={votes}
     regenerate={regenerate}
     selectedModelId={selectedModelId}
+    theme={theme}
   />
 
  {showListings && listingType && (
@@ -297,15 +282,13 @@ useEffect(() => {
             <div className="px-2 pt-3">
             <MiniForm config={formConfig} />
             </div>)}
-     
-  
-</div>
+     </div>
 </div>
     
 
   {/* Sticky input */}
   {!isReadonly && (
-    <div className="sticky bottom-0 mx-auto w-full max-w-4xl  px-2 pb-3 md:px-4 md:pb-4"
+    <div className="sticky bottom-0 bg-inherit mx-auto w-full max-w-4xl  px-2 pb-3 md:px-4 md:pb-4"
     >
       <MultimodalInput
         chatId={id}

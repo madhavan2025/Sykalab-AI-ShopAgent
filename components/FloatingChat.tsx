@@ -95,64 +95,83 @@ if (loadingTheme) return null;
 
       {/* Floating Chat */}
       {isOpen && (
-       <div
-  className={`flex flex-col overflow-hidden transition-all duration-300 
+  <div
+    className={`fixed z-[9999]  transition-all duration-300 ease-in-out
+      ${
+        isFullScreen
+          ? "inset-0 flex items-center justify-center bg-black/40 p-4"
+          : "bottom-4 right-4"
+      }
+    `}
+  >
+  <div
+  className={`flex flex-col overflow-hidden transition-all duration-300 ease-in-out
     ${
       isFullScreen
-        ? "fixed inset-0"
-        : "w-[360px] h-[520px]"
+        ? `
+          w-full h-screen rounded-none
+          sm:h-[97vh] sm:max-w-6xl sm:rounded-xl
+        `
+        : "w-[92vw] h-[70vh] sm:w-[420px] sm:h-[580px] rounded-xl"
     }
   `}
   style={{
     backgroundColor: theme.windowBg,
     border: theme.borderColor,
-    borderRadius: theme.borderRadius,
-    boxShadow: theme.shadow
+    boxShadow: theme.shadow,
   }}
 >
+      {/* HEADER */}
+      <div
+        className="flex items-center justify-between px-4 py-3"
+        style={{
+          backgroundColor: theme?.headerBg,
+          color: theme?.headerTextColor,
+        }}
+      >
+        <span className="font-semibold">Chatbot</span>
 
+        <div className="flex items-center gap-3">
+          {/* Expand / Minimize */}
+          <button
+            onClick={() => setIsFullScreen(!isFullScreen)}
+            className="hover:opacity-80 cursor-pointer"
+          >
+            {isFullScreen ? (
+              <Minimize2 size={18} />
+            ) : (
+              <Maximize2 size={18} />
+            )}
+          </button>
 
-    <div
-  className="flex items-center justify-between px-4 py-3"
-  style={{
-    backgroundColor: theme?.headerBg,
-    color: theme?.headerTextColor
-  }}
->
-
-
-  <span className="font-semibold">Chatbot</span>
-      <div className="flex items-center gap-3">
-              {/* Expand / Minimize Button */}
-              <button
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                className="hover:opacity-80 cursor-pointer"
-              >
-                {isFullScreen ? (
-                  <Minimize2 size={18} />
-                ) : (
-                  <Maximize2 size={18} />
-                )}
-              </button>
-  <button className="cursor-pointer" onClick={() => setIsOpen(false)}>✕</button>
-</div>
-</div>
-
-
-
-          {/* Chat Body */}
-          <div className="flex-1 overflow-hidden">
-            <Chat
-              id={chatId}
-              initialMessages={initialMessages}
-              initialChatModel={initialChatModel}
-              initialVisibilityType={initialVisibilityType}
-              isReadonly={isReadonly}
-              autoResume={autoResume}
-            />
-          </div>
+          {/* Close */}
+          <button
+            className="cursor-pointer"
+            onClick={() => {
+              setIsOpen(false);
+              setIsFullScreen(false);
+            }}
+          >
+            ✕
+          </button>
         </div>
-      )}
+      </div>
+
+      {/* CHAT BODY */}
+      <div className="flex-1 overflow-hidden">
+        <Chat
+          id={chatId}
+          initialMessages={initialMessages}
+          initialChatModel={initialChatModel}
+          initialVisibilityType={initialVisibilityType}
+          isReadonly={isReadonly}
+          autoResume={autoResume}
+          theme={theme}
+        />
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
