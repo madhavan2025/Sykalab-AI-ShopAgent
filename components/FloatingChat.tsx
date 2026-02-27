@@ -2,7 +2,7 @@
 
 import React, { useState,useEffect } from "react";
 import { Chat } from "./chat";
-import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
+
 import type { ChatMessage } from "@/lib/types";
 import type { VisibilityType } from "./visibility-selector";
 import { isEmbedMode } from "@/lib/isEmbed";
@@ -20,7 +20,6 @@ interface FloatingChatProps {
 export const FloatingChat: React.FC<FloatingChatProps> = ({
   chatId,
   initialMessages = [],
-  initialChatModel = DEFAULT_CHAT_MODEL,
   initialVisibilityType = "public",
   isReadonly = false,
   autoResume = true,
@@ -30,7 +29,7 @@ export const FloatingChat: React.FC<FloatingChatProps> = ({
   const [theme, setTheme] = useState<any>(null);
 const [loadingTheme, setLoadingTheme] = useState(true);
 const [isFullScreen, setIsFullScreen] = useState(false);
-
+const [isDarkMode, setIsDarkMode] = useState(false);
    useEffect(() => {
     setIsEmbed(isEmbedMode());
   }, []);
@@ -162,7 +161,6 @@ if (loadingTheme) return null;
         <Chat
           id={chatId}
           initialMessages={initialMessages}
-          initialChatModel={initialChatModel}
           initialVisibilityType={initialVisibilityType}
           isReadonly={isReadonly}
           autoResume={autoResume}

@@ -37,14 +37,12 @@ async function getContents() {
 export function Chat({
   id,
   initialMessages,
-  initialChatModel,
   initialVisibilityType,
   isReadonly,
 
 }: {
   id: string;
   initialMessages: ChatMessage[];
-  initialChatModel: string;
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
   autoResume?: boolean; // ✅ optional in type
@@ -65,8 +63,6 @@ export function Chat({
    const status: ChatStatus = "ready"; 
    const addToolApprovalResponse = async () => {};
   const regenerate = async () => {};
-
-const selectedModelId = initialChatModel;
 const stop = async () => {};
 const votes: { chatId: string; messageId: string; isUpvoted: boolean }[] = [];
 const selectedVisibilityType = initialVisibilityType; // UI stub
@@ -255,7 +251,6 @@ useEffect(() => {
     addToolApprovalResponse={addToolApprovalResponse}
     votes={votes}
     regenerate={regenerate}
-    selectedModelId={selectedModelId}
    
   />
 
@@ -302,7 +297,6 @@ useEffect(() => {
         status={status}
         stop={stop}
         selectedVisibilityType={selectedVisibilityType}
-        selectedModelId={selectedModelId}
       />
     </div>
   )}
@@ -315,7 +309,6 @@ useEffect(() => {
   messages={messages}
   attachments={attachments}
   isReadonly={isReadonly}
-  selectedModelId={selectedModelId}
   selectedVisibilityType={initialVisibilityType}
   sendMessage={sendMessage}
   setInput={setInput}

@@ -17,7 +17,7 @@ type MessagesProps = {
   regenerate: UseChatHelpers<ChatMessage>["regenerate"];
   isReadonly: boolean;
   isArtifactVisible: boolean;
-  selectedModelId: string;
+
 };
 
 function PureMessages({
@@ -29,7 +29,7 @@ function PureMessages({
   setMessages,
   regenerate,
   isReadonly,
-  selectedModelId: _selectedModelId,
+ 
 }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
