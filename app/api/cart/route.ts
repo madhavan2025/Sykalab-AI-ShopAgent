@@ -56,22 +56,27 @@ export async function POST(req: Request) {
 }
 
 // REMOVE PRODUCT FROM CART (decrease or delete)
-// REMOVE PRODUCT FROM CART (decrease, delete single, or clear all)
 export async function DELETE(req: Request) {
   try {
     const body = await req.json();
-    const { id, clear } = body;
+    const { id, clear, removeAll } = body;
 
     const client = await clientPromise;
     const db = client.db("floating");
 
-    // ✅ CASE 1: Clear entire cart
+    // ✅ Clear entire cart
     if (clear) {
       await db.collection("cart").deleteMany({});
       return NextResponse.json({ message: "Cart cleared" });
     }
 
-    // ✅ CASE 2: Remove specific item
+    // ✅ Remove item completely (❌ button)
+    if (removeAll) {
+      await db.collection("cart").deleteOne({ _id: id });
+      return NextResponse.json({ message: "Item removed completely" });
+    }
+
+    // ✅ Decrease quantity (- button)
     const item = await db.collection("cart").findOne({ _id: id });
 
     if (!item) {
@@ -90,7 +95,7 @@ export async function DELETE(req: Request) {
       await db.collection("cart").deleteOne({ _id: id });
     }
 
-    return NextResponse.json({ message: "Item removed" });
+    return NextResponse.json({ message: "Item decreased" });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to remove item" },
