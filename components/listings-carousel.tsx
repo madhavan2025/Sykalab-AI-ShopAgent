@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCart } from "../app/context/CartContext";
 
 type Listing = {
-  id: string;
+  _id: string;
   title: string;
   price: string;
   image: string;
@@ -13,68 +12,82 @@ type Listing = {
 };
 type ListingsCarouselProps = {
   style?: "type1" | "type2";
+  onViewCart?:()=>void;
 };
 
-export function ListingsCarousel({ style = "type1" }: ListingsCarouselProps) {
+export function ListingsCarousel({
+  style = "type1",
+  onViewCart,
+}: ListingsCarouselProps) {
   const [index, setIndex] = useState(0);
   const [addedItems, setAddedItems] = useState<Record<string, boolean>>({});
   const [justAdded, setJustAdded] = useState<Record<string, boolean>>({});
   const [products, setProducts] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<Record<string, boolean>>({});
   const visibleCount = style === "type1" ? 1 : 2;
   const total = products.length;
-
   const router = useRouter();
-  const { addToCart } = useCart();
-
   const next = () => setIndex((i) => (i + visibleCount) % total);
   const prev = () => setIndex((i) => (i - visibleCount + total) % total);
-
- const visibleListings = products.slice(index, index + visibleCount);
+  const visibleListings = products.slice(index, index + visibleCount);
 
 
   const handleClick = (listing: Listing) => {
-    router.push(`/product/${listing.id}`);
+    router.push(`/product/${listing._id}`);
   };
 
-  useEffect(() => {
-    setIndex(0);
-  }, [style]);
-
-  const handleAddToCart = (listing: Listing) => {
-  // Add this product only to the cart
-  addToCart(listing);
-
-  // Show "Added ✓" for this product
-  setJustAdded((prev) => ({ ...prev, [listing.id]: true }));
-
-  // After 3 seconds, hide "Added ✓" and allow "View Cart"
-  setTimeout(() => {
-    setJustAdded((prev) => ({ ...prev, [listing.id]: false }));
-    setAddedItems((prev) => ({ ...prev, [listing.id]: true }));
-  }, 3000);
-};
-
-
-    async function getProducts() {
+  async function getProducts() {
   const res = await fetch("/api/products");
   if (!res.ok) throw new Error("Failed to fetch products");
   return res.json();
 }
 
+async function fetchCart() {
+    const res = await fetch("/api/cart");
+    const data = await res.json();
+    // Convert to a lookup object for fast access
+    const cartLookup: Record<string, boolean> = {};
+    data.forEach((item: any) => {
+      cartLookup[item._id] = true;
+    });
+    setCartItems(cartLookup);
+    setAddedItems(cartLookup);
+  }
+
+  useEffect(() => {
+    setIndex(0);
+  }, [style]);
+
+ 
+
+const handleAddToCart = async (listing: any) => {
+  await fetch("/api/cart", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(listing),
+  });
+
+  setJustAdded((prev) => ({ ...prev, [listing._id]: true }));
+
+  setTimeout(() => {
+    setJustAdded((prev) => ({ ...prev, [listing._id]: false }));
+    setAddedItems((prev) => ({ ...prev, [listing._id]: true }));
+  }, 2000);
+};
+    
+
 useEffect(() => {
     async function fetchData() {
       try {
-        const fetchedProducts = await getProducts();
+        const [fetchedProducts] = await Promise.all([getProducts(), fetchCart()]);
         setProducts(fetchedProducts);
-
-       
       } catch (error) {
-        console.error("Failed to fetch products or form:", error);
+        console.error("Failed to fetch products or cart:", error);
       }
     }
-
     fetchData();
   }, []);
+
 
   if (!products || products.length === 0) {
     return <div>No products available</div>;
@@ -86,7 +99,7 @@ useEffect(() => {
   const renderType1 = () => (
     <div className="grid grid-cols-1 gap-4">
       {visibleListings.map((listing) => (
-        <div key={listing.id} className="border rounded-lg p-4">
+        <div key={listing._id} className="border rounded-lg p-4">
           <div className="relative group">
           <img
             src={listing.image}
@@ -134,16 +147,16 @@ useEffect(() => {
           <p>{listing.price}</p>
           <p className="text-sm line-clamp-3">{listing.description}</p>
 
-          {justAdded[listing.id] ? (
+          {justAdded[listing._id] ? (
             <button
               disabled
               className="mt-2 w-full bg-green-600 text-white py-2 rounded-md"
             >
               Added ✓
             </button>
-          ) : addedItems[listing.id] ? (
+          ) : addedItems[listing._id] ? (
             <button
-              onClick={() => router.push("/cart")}
+               onClick={() => onViewCart?.()}
               className="mt-2 w-full text-xs underline cursor-pointer"
             >
               View cart
@@ -203,7 +216,7 @@ useEffect(() => {
   </button>
     <div className="grid grid-cols-2  gap-4">
       {visibleListings.map((listing) => (
-       <div key={listing.id} className="border-2  rounded-lg hover:shadow-xl transition">
+       <div key={listing._id} className="border-2  rounded-lg hover:shadow-xl transition">
           <img
             src={listing.image}
             alt={listing.title}
@@ -224,16 +237,16 @@ useEffect(() => {
             {listing.description}
           </p>
           </div>
-                   {justAdded[listing.id] ? (
+                   {justAdded[listing._id] ? (
             <button
               disabled
               className="mt-2 w-full bg-green-600 text-white py-2 rounded-md cursor-not-allowed"
             >
               Added ✓
             </button>
-          ) : addedItems[listing.id] ? (
+          ) : addedItems[listing._id] ? (
             <button
-              onClick={() => router.push("/cart")}
+             onClick={() => onViewCart?.()}
               className="mt-2 w-full text-xs underline text-black hover:text-gray-700 cursor-pointer"
             >
               View cart
@@ -258,14 +271,7 @@ useEffect(() => {
       <h3 className="mb-3 text-sm font-semibold text-gray-500">
         Featured Listings
       </h3>
-
-     
   {style === "type1" ? renderType1() : renderType2()}
-
-
- 
-
-
     </div>
   );
 }

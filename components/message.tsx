@@ -126,13 +126,15 @@ const PurePreviewMessage = ({
               if (mode === "view") {
                 return (
                   <div key={key}>
-                    <MessageContent
-                      className={cn({
-                        "wrap-break-word w-fit rounded-2xl px-3 py-2 text-right text-white":
-                          message.role === "user",
-                        "bg-transparent px-0 py-0 text-left":
-                          message.role === "assistant",
-                      })}
+                   <MessageContent
+  className={cn(
+    "wrap-break-word w-fit rounded-2xl px-3 py-2",
+    message.role === "user" &&
+      "bg-blue-600 text-white dark:bg-blue-500",
+    message.role === "assistant" &&
+      "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+  )}
+
                       data-testid="message-content"
                       style={
                         message.role === "user"

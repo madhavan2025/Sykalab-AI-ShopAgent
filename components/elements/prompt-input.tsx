@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-
+import React, { forwardRef } from "react";
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 
 export const PromptInput = ({ className, ...props }: PromptInputProps) => (
@@ -38,63 +38,69 @@ export type PromptInputTextareaProps = ComponentProps<typeof Textarea> & {
   resizeOnNewLinesOnly?: boolean;
 };
 
-export const PromptInputTextarea = ({
-  onChange,
-  className,
-  placeholder = "What would you like to know?",
-  minHeight = 48,
-  maxHeight = 164,
-  disableAutoResize = false,
-  resizeOnNewLinesOnly = false,
-  ...props
-}: PromptInputTextareaProps) => {
-  const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
-    if (e.key === "Enter") {
-      if (e.nativeEvent.isComposing) {
-        return;
+
+export const PromptInputTextarea = forwardRef<
+  HTMLTextAreaElement,
+  PromptInputTextareaProps
+>(
+  (
+    {
+      onChange,
+      className,
+      placeholder = "What would you like to know?",
+      minHeight = 48,
+      maxHeight = 164,
+      disableAutoResize = false,
+      resizeOnNewLinesOnly = false,
+      ...props
+    },
+    ref
+  ) => {
+    const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
+      if (e.key === "Enter") {
+        if (e.nativeEvent.isComposing) return;
+        if (e.shiftKey) return;
+
+        e.preventDefault();
+
+        const form = e.currentTarget.form;
+        const submitButton = form?.querySelector(
+          'button[type="submit"]'
+        ) as HTMLButtonElement | null;
+
+        if (submitButton?.disabled) return;
+
+        form?.requestSubmit();
       }
+    };
 
-      if (e.shiftKey) {
-        return;
-      }
-
-      e.preventDefault();
-
-      const form = e.currentTarget.form;
-      const submitButton = form?.querySelector(
-        'button[type="submit"]'
-      ) as HTMLButtonElement | null;
-      if (submitButton?.disabled) {
-        return;
-      }
-
-      form?.requestSubmit();
-    }
-  };
-
-  return (
-    <Textarea
-      className={cn(
-        "w-full resize-none rounded-none border-none p-3 shadow-none outline-hidden ring-0",
-        disableAutoResize
-          ? "field-sizing-fixed"
-          : resizeOnNewLinesOnly
+    return (
+      <Textarea
+        ref={ref}
+        className={cn(
+          "w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0",
+          "bg-transparent",
+         
+          "placeholder:text-gray-500 dark:placeholder:text-gray-500",
+          disableAutoResize
+            ? "field-sizing-fixed"
+            : resizeOnNewLinesOnly
             ? "field-sizing-fixed"
             : "field-sizing-content max-h-[6lh]",
-        "bg-transparent dark:bg-transparent",
-        "focus-visible:ring-0",
-        className
-      )}
-      name="message"
-      onChange={(e) => {
-        onChange?.(e);
-      }}
-      onKeyDown={handleKeyDown}
-      placeholder={placeholder}
-      {...props}
-    />
-  );
-};
+          "focus-visible:ring-0",
+          className
+        )}
+        name="message"
+        onChange={(e) => onChange?.(e)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        {...props}
+      />
+    );
+  }
+);
+
+PromptInputTextarea.displayName = "PromptInputTextarea";
 
 export type PromptInputToolbarProps = HTMLAttributes<HTMLDivElement>;
 

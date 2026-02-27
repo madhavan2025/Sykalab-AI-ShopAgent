@@ -2,12 +2,12 @@
 
 import React, { useState,useEffect } from "react";
 import { Chat } from "./chat";
-
+import { Maximize2, Minimize2, Sun, Moon } from "lucide-react";
 import type { ChatMessage } from "@/lib/types";
 import type { VisibilityType } from "./visibility-selector";
 import { isEmbedMode } from "@/lib/isEmbed";
 import Image from "next/image";
-import { Maximize2, Minimize2 } from "lucide-react";
+
 interface FloatingChatProps {
   chatId: string;
   initialMessages?: ChatMessage[];
@@ -35,16 +35,15 @@ const [isDarkMode, setIsDarkMode] = useState(false);
   }, []);
 
 
- useEffect(() => {
+useEffect(() => {
   const loadTheme = async () => {
     try {
-      const res = await fetch("/api/chat-theme");
+      const themeName = isDarkMode ? "darkTheme" : "default";
+
+      const res = await fetch(`/api/chat-theme?theme=${themeName}`);
       const data = await res.json();
 
-      console.log("Theme API Response:", data); // 👈 ADD THIS
-
-      setTheme(Array.isArray(data) ? data[0] : data);
-
+      setTheme(data);
     } catch (err) {
       console.error("Theme load failed", err);
     } finally {
@@ -53,7 +52,7 @@ const [isDarkMode, setIsDarkMode] = useState(false);
   };
 
   loadTheme();
-}, []);
+}, [isDarkMode]);
 
 
 if (loadingTheme) return null;
@@ -83,12 +82,6 @@ if (loadingTheme) return null;
     }}
   />
 )}
-
-
-
-
-
-
         </button>
       )}
 
@@ -122,15 +115,27 @@ if (loadingTheme) return null;
 >
       {/* HEADER */}
       <div
-        className="flex items-center justify-between px-4 py-3"
+        className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-100"
         style={{
           backgroundColor: theme?.headerBg,
           color: theme?.headerTextColor,
         }}
       >
-        <span className="font-semibold">Chatbot</span>
+        <span className="font-semibold">Sykalab-AI-ShopAgent</span>
 
         <div className="flex items-center gap-3">
+          {/* Dark Mode Toggle */}
+          {/* Dark Mode Toggle */}
+<button
+  onClick={() => setIsDarkMode(!isDarkMode)}
+  className="hover:opacity-80 cursor-pointer flex items-center justify-center"
+>
+  {isDarkMode ? (
+    <Sun size={18} />
+  ) : (
+    <Moon size={18} />
+  )}
+</button>
           {/* Expand / Minimize */}
           <button
             onClick={() => setIsFullScreen(!isFullScreen)}

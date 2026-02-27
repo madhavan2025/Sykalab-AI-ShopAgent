@@ -74,10 +74,12 @@ function PureMultimodalInput({
     }
   }, [width]);
 
-  useEffect(() => {
-    const finalValue = localStorageInput || "";
-    setInput(finalValue);
-  }, [localStorageInput, setInput]);
+useEffect(() => {
+  if (localStorageInput) {
+    setInput(localStorageInput);
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   useEffect(() => {
     setLocalStorageInput(input);
@@ -216,37 +218,53 @@ function PureMultimodalInput({
           </div>
         )}
 
-        <PromptInputTextarea
-          ref={textareaRef}
-          value={input}
-          onChange={handleInput}
-          placeholder="Send a message..."
-          rows={1}
-        />
+      <PromptInputTextarea
+  ref={textareaRef}
+  value={input}
+  onChange={handleInput}
+  placeholder="Send a message..."
+  rows={1}
+  className="
+    bg-transparent 
+    text-foreground 
+    dark:text-white
+    placeholder:text-muted-foreground 
+    dark:placeholder:text-gray-400
+    focus-visible:outline-none
+  "
+/>
 
         <PromptInputToolbar>
           <PromptInputTools>
             <Button
-              variant="ghost"
-              onClick={(e) => {
-                e.preventDefault();
-                fileInputRef.current?.click();
-              }}
-              disabled={status !== "ready"}
-            >
-              <PaperclipIcon size={14} />
-            </Button>
+  variant="ghost"
+  size="icon-sm"
+  onClick={(e) => {
+    e.preventDefault();
+    fileInputRef.current?.click();
+  }}
+  disabled={status !== "ready"}
+>
+  <PaperclipIcon size={14} />
+</Button>
           </PromptInputTools>
 
           {status === "submitted" ? (
             <StopButton stop={stop} setMessages={setMessages} />
           ) : (
             <PromptInputSubmit
-              disabled={!input.trim() || uploadQueue.length > 0}
-              status={status}
-            >
-              <ArrowUpIcon size={14} />
-            </PromptInputSubmit>
+  disabled={!input.trim() || uploadQueue.length > 0}
+  status={status}
+className="
+  text-white 
+  transition-colors
+  disabled:opacity-50 
+  disabled:cursor-not-allowed
+  cursor-pointer
+"
+>
+  <ArrowUpIcon size={14} />
+</PromptInputSubmit>
           )}
         </PromptInputToolbar>
       </PromptInput>
@@ -271,6 +289,8 @@ function StopButton({
 }) {
   return (
     <Button
+      variant="ghost"
+      size="icon-sm"
       onClick={(e) => {
         e.preventDefault();
         stop();

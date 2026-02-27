@@ -150,15 +150,7 @@
   If we ever want to remove these styles, we need to add an explicit border
   color utility to any element that depends on these defaults.
 */
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
+
 
 @utility text-balance {
   text-wrap: balance;
@@ -192,21 +184,7 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
 
-  body {
-    @apply bg-background text-foreground;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  html {
-    overflow-x: hidden;
-  }
-}
 
 .skeleton {
   * {
@@ -309,10 +287,36 @@
 }
 
 @layer base {
+  /* Global border and outline */
   * {
     @apply border-border outline-ring/50;
   }
+
+  /* Body styling */
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Ensure form elements inherit text color */
+  textarea,
+  input,
+  select {
+    @apply text-foreground bg-background border-input;
+  }
+
+  /* HTML overflow */
+  html {
+    overflow-x: hidden;
+  }
+
+  /* Compatibility for pseudo-elements */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
   }
 }

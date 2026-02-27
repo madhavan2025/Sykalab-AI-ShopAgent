@@ -4,7 +4,7 @@ import { useState,useEffect } from "react";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { VisibilityType } from "./visibility-selector";
 import { ChatStatus } from "ai";
-
+import CartComponent from "./Cart";
 import { ListingsCarousel } from "@/components/listings-carousel";
 import { ContentListing } from "../components/ContentListing";
 import { MiniForm } from "./MiniForm";
@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
+import CheckoutComponent from "./Checkout";
 import { Artifact } from "./artifact";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
@@ -55,7 +55,8 @@ export function Chat({
   const [showListings, setShowListings] = useState(false);
   const [showContentList, setShowContentList] = useState(false);
   const [showForm, setShowForm] = useState(false);
-    
+     const [showCart, setShowCart] = useState(false);
+const [showCheckout, setShowCheckout] = useState(false);
       const [formConfig, setFormConfig] = useState<any>(null);
       const [contents, setContents] = useState<any[]>([]);
 
@@ -254,14 +255,49 @@ useEffect(() => {
    
   />
 
- {showListings && listingType && (
-  <div className="px-2 pt-3 ">
+{showListings && listingType && !showCart && !showCheckout && (
+  <div className="px-2 pt-3">
     <ListingsCarousel
-      style={listingType} // type1 or type2
+      style={listingType}
+      onViewCart={() => {
+        setShowListings(false);
+        setShowCart(true);
+      }}
     />
   </div>
 )}
 
+{showCart && (
+  <div className="px-2 pt-3">
+    <CartComponent
+      goBack={() => {
+        setShowCart(false);
+        setShowListings(true);
+      }}
+      goCheckout={() => {
+        setShowCart(false);
+        setShowCheckout(true);
+      }}
+    />
+  </div>
+)}
+
+{showCheckout && (
+  <div className="px-2 pt-3">
+    <CheckoutComponent
+      goBack={() => {
+        setShowCheckout(false);
+        setShowCart(true);
+      }}
+      goHome={() => {
+        setShowCheckout(false);
+        setShowCart(false);
+        setShowListings(true);
+        
+      }}
+    />
+  </div>
+)}
 
 {showContentList && (
    <div className="px-2 pt-3">
