@@ -1,6 +1,5 @@
 import equal from "fast-deep-equal";
-import { memo } from "react";
-import { toast } from "sonner";
+import { memo,useState,useEffect,useRef } from "react";
 import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
 import type { Vote } from "@/lib/db/schema";
@@ -23,10 +22,20 @@ export function PureMessageActions({
 }) {
   const { mutate } = useSWRConfig();
   const [_, copyToClipboard] = useCopyToClipboard();
+    // Added state for copied tooltip toggle
+  const [copied, setCopied] = useState(false);
+  const [localVote, setLocalVote] = useState<"up" | "down" | null>(null);
+   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // ✅ Keep localVote synced with server vote
+  useEffect(() => {
+    if (!vote) {
+      setLocalVote(null);
+    } else {
+      setLocalVote(vote.isUpvoted ? "up" : "down");
+    }
+  }, [vote]);
 
-  if (isLoading) {
-    return null;
-  }
+  if (isLoading) return null;
 
   const textFromParts = message.parts
     ?.filter((part) => part.type === "text")
@@ -34,16 +43,58 @@ export function PureMessageActions({
     .join("\n")
     .trim();
 
-  const handleCopy = async () => {
-    if (!textFromParts) {
-      toast.error("There's no text to copy!");
-      return;
-    }
+   const handleCopy = async () => {
+    if (!textFromParts) return;
 
     await copyToClipboard(textFromParts);
-    toast.success("Copied to clipboard!");
-  };
+    setCopied(true);
+     if (timeoutRef.current) {
+    clearTimeout(timeoutRef.current);
+  }
 
+  // Show "Copied!" for 3 seconds (3000 ms)
+  timeoutRef.current = setTimeout(() => {
+    setCopied(false);
+    timeoutRef.current = null;
+  }, 3000);
+};
+
+  const handleVote = async (type: "up" | "down") => {
+    const newVote = localVote === type ? null : type; // toggle behavior
+    setLocalVote(newVote);
+
+    await fetch("/api/vote", {
+      method: "PATCH",
+      body: JSON.stringify({
+        chatId,
+        messageId: message.id,
+        type: newVote ?? "none",
+      }),
+    });
+
+    mutate<Vote[]>(
+      `/api/vote?chatId=${chatId}`,
+      (currentVotes) => {
+        if (!currentVotes) return [];
+
+        const votesWithoutCurrent = currentVotes.filter(
+          (v) => v.messageId !== message.id
+        );
+
+        if (!newVote) return votesWithoutCurrent;
+
+        return [
+          ...votesWithoutCurrent,
+          {
+            chatId,
+            messageId: message.id,
+            isUpvoted: newVote === "up",
+          },
+        ];
+      },
+      { revalidate: false }
+    );
+  };
   // User messages get edit (on hover) and copy actions
   if (message.role === "user") {
     return (
@@ -59,7 +110,11 @@ export function PureMessageActions({
               <PencilEditIcon />
             </Action>
           )}
-          <Action onClick={handleCopy} tooltip="Copy">
+        <Action
+            onClick={handleCopy}
+            tooltip={copied ? "Copied!" : "Copy"}
+          >
+
             <CopyIcon />
           </Action>
         </div>
@@ -69,106 +124,31 @@ export function PureMessageActions({
 
   return (
     <Actions className="-ml-0.5">
-      <Action onClick={handleCopy} tooltip="Copy">
+        <Action
+        onClick={handleCopy}
+        tooltip={copied ? "Copied!" : "Copy"}
+      >
         <CopyIcon />
       </Action>
-
-      <Action
-        data-testid="message-upvote"
-        disabled={vote?.isUpvoted}
-        onClick={() => {
-          const upvote = fetch("/api/vote", {
-            method: "PATCH",
-            body: JSON.stringify({
-              chatId,
-              messageId: message.id,
-              type: "up",
-            }),
-          });
-
-          toast.promise(upvote, {
-            loading: "Upvoting Response...",
-            success: () => {
-              mutate<Vote[]>(
-                `/api/vote?chatId=${chatId}`,
-                (currentVotes) => {
-                  if (!currentVotes) {
-                    return [];
-                  }
-
-                  const votesWithoutCurrent = currentVotes.filter(
-                    (currentVote) => currentVote.messageId !== message.id
-                  );
-
-                  return [
-                    ...votesWithoutCurrent,
-                    {
-                      chatId,
-                      messageId: message.id,
-                      isUpvoted: true,
-                    },
-                  ];
-                },
-                { revalidate: false }
-              );
-
-              return "Upvoted Response!";
-            },
-            error: "Failed to upvote response.",
-          });
-        }}
-        tooltip="Upvote Response"
-      >
-        <ThumbUpIcon />
+      <Action onClick={() => handleVote("up")} tooltip="Upvote">
+        <span
+          className={`transition-colors ${
+            localVote === "up" ? "text-green-500" : "text-muted-foreground"
+          }`}
+        >
+          <ThumbUpIcon />
+        </span>
       </Action>
 
-      <Action
-        data-testid="message-downvote"
-        disabled={vote && !vote.isUpvoted}
-        onClick={() => {
-          const downvote = fetch("/api/vote", {
-            method: "PATCH",
-            body: JSON.stringify({
-              chatId,
-              messageId: message.id,
-              type: "down",
-            }),
-          });
-
-          toast.promise(downvote, {
-            loading: "Downvoting Response...",
-            success: () => {
-              mutate<Vote[]>(
-                `/api/vote?chatId=${chatId}`,
-                (currentVotes) => {
-                  if (!currentVotes) {
-                    return [];
-                  }
-
-                  const votesWithoutCurrent = currentVotes.filter(
-                    (currentVote) => currentVote.messageId !== message.id
-                  );
-
-                  return [
-                    ...votesWithoutCurrent,
-                    {
-                      chatId,
-                      messageId: message.id,
-                      isUpvoted: false,
-                    },
-                  ];
-                },
-                { revalidate: false }
-              );
-
-              return "Downvoted Response!";
-            },
-            error: "Failed to downvote response.",
-          });
-        }}
-        tooltip="Downvote Response"
-      >
-        <ThumbDownIcon />
+      {/* Downvote */}
+      <Action onClick={() => handleVote("down")} tooltip="Downvote">
+        <span
+          className={`transition-colors ${
+            localVote === "down" ? "text-red-500" : "text-muted-foreground"
+          }`}
+        >
+          <ThumbDownIcon />
+        </span>
       </Action>
     </Actions>
   );

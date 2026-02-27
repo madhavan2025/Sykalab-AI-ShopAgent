@@ -26,36 +26,36 @@ type MiniFormProps = {
 export function MiniForm({ config }: MiniFormProps) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
-const [errors, setErrors] = useState<Record<string, string>>({});
-const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const validate = () => {
-  const newErrors: Record<string, string> = {};
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
 
-  config.fields.forEach((field) => {
-    if (field.required && !formData[field.name]?.trim()) {
-      newErrors[field.name] = `${field.label || field.name} is required`;
-    }
+    config.fields.forEach((field) => {
+      if (field.required && !formData[field.name]?.trim()) {
+        newErrors[field.name] = `${field.label || field.name} is required`;
+      }
 
-    if (
-      field.type === "email" &&
-      formData[field.name] &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData[field.name])
-    ) {
-      newErrors[field.name] = "Invalid email address";
-    }
-  });
+      if (
+        field.type === "email" &&
+        formData[field.name] &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData[field.name])
+      ) {
+        newErrors[field.name] = "Invalid email address";
+      }
+    });
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // ✅ prevents page reload
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); 
     if (!validate()) return;
 
     setLoading(true);
@@ -68,7 +68,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
       if (!res.ok) throw new Error("Failed to submit");
 
-      setSubmitted(true); // ✅ show success message
+      setSubmitted(true); 
     } catch (err) {
       console.error(err);
     } finally {
@@ -78,48 +78,39 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   if (submitted) {
     return (
-      <div className="rounded-xl border bg-green-50 p-4 text-sm">
-        {config.successMessage}
-      </div>
-    );
-  }
-
-
-  if (submitted) {
-    return (
-      <div className="rounded-xl border bg-green-50 p-4 text-sm">
+      <div className="rounded-xl mb-2 border bg-green-50 dark:bg-green-900 dark:text-green-100 p-4 text-sm">
         {config.successMessage}
       </div>
     );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-xl border  p-4 space-y-3"
-    >
-      <h3 className="text-sm font-semibold">{config.title}</h3>
+   <form
+  onSubmit={handleSubmit}
+  className="w-full max-w-none rounded-xl mb-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-4 space-y-3 transition-colors"
+>
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {config.title}
+      </h3>
 
       {config.fields.map((field) => (
         <div key={field.name}>
           {field.label && (
-            <label className="block text-xs mb-1">
+            <label className="block text-xs mb-1 text-gray-700 dark:text-gray-300">
               {field.label}
             </label>
           )}
 
           {field.type === "textarea" ? (
             <textarea
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors"
               placeholder={field.placeholder}
-                value={formData[field.name] || ""}
+              value={formData[field.name] || ""}
               onChange={(e) => handleChange(field.name, e.target.value)}
-            
-              
             />
           ) : field.type === "select" ? (
             <select
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors"
               value={formData[field.name] || ""}
               onChange={(e) => handleChange(field.name, e.target.value)}
             >
@@ -133,20 +124,22 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           ) : (
             <input
               type={field.type}
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors"
               placeholder={field.placeholder}
-               value={formData[field.name] || ""}
+              value={formData[field.name] || ""}
               onChange={(e) => handleChange(field.name, e.target.value)}
             />
           )}
+
           {errors[field.name] && (
             <p className="text-xs text-red-500 mt-1">{errors[field.name]}</p>
           )}
         </div>
       ))}
-        <button
+
+      <button
         type="submit"
-        className="w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800 cursor-pointer"
+        className="w-full rounded-md bg-black dark:bg-gray-700 text-white px-3 py-2 text-sm font-semibold hover:bg-gray-900 dark:hover:bg-gray-600 transition cursor-pointer"
         disabled={loading}
       >
         {loading ? "Submitting..." : config.submitLabel}

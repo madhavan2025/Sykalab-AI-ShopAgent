@@ -59,7 +59,7 @@ export function Chat({
 const [showCheckout, setShowCheckout] = useState(false);
       const [formConfig, setFormConfig] = useState<any>(null);
       const [contents, setContents] = useState<any[]>([]);
-
+   
   const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
    const status: ChatStatus = "ready"; 
    const addToolApprovalResponse = async () => {};
@@ -239,7 +239,9 @@ useEffect(() => {
 
   return (
     <>
-<div className="flex h-full min-h-0 flex-col items-center "> 
+<div
+  className="relative flex h-full min-h-0 flex-col items-center"
+> 
 <div className="flex-1 overflow-y-auto min-h-0">
   <div className="mx-auto w-full max-w-4xl flex flex-col">
   <Messages
@@ -254,6 +256,7 @@ useEffect(() => {
     regenerate={regenerate}
    
   />
+
 
 {showListings && listingType && !showCart && !showCheckout && (
   <div className="px-2 pt-3">

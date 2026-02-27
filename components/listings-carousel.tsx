@@ -99,7 +99,7 @@ useEffect(() => {
   const renderType1 = () => (
     <div className="grid grid-cols-1 gap-4">
       {visibleListings.map((listing) => (
-        <div key={listing._id} className="border rounded-lg p-4">
+        <div key={listing._id} className="rounded-lg p-4">
           <div className="relative group">
           <img
             src={listing.image}
@@ -143,9 +143,9 @@ useEffect(() => {
     </svg>
   </button>
 </div>
-          <h4 className="mt-2 font-semibold">{listing.title}</h4>
-          <p>{listing.price}</p>
-          <p className="text-sm line-clamp-3">{listing.description}</p>
+          <h4 className="mt-2 font-semibold  text-gray-900 dark:text-gray-100">{listing.title}</h4>
+          <p className=" text-gray-800 dark:text-gray-100">{listing.price}</p>
+          <p className="text-sm line-clamp-3  text-gray-600 dark:text-gray-100">{listing.description}</p>
 
           {justAdded[listing._id] ? (
             <button
@@ -157,7 +157,7 @@ useEffect(() => {
           ) : addedItems[listing._id] ? (
             <button
                onClick={() => onViewCart?.()}
-              className="mt-2 w-full text-xs underline cursor-pointer"
+              className="mt-2 w-full text-gray-600 dark:text-gray-100 text-xs underline cursor-pointer"
             >
               View cart
             </button>
@@ -224,16 +224,16 @@ useEffect(() => {
             onClick={() => handleClick(listing)}
           />
             <div className="p-4 flex flex-col gap-2">
-          <h4 className="text-sm font-semibold line-clamp-2 min-h-[40px]">
+          <h4 className="text-sm text-gray-900 dark:text-gray-100 font-semibold line-clamp-2 min-h-[40px]">
             {listing.title}
           </h4>
 
           {/* Price row aligned equal */}
-          <p className="text-base font-bold text-gray-800 min-h-[24px]">
+          <p className="text-base text-gray-800 dark:text-gray-100 font-bold  min-h-[24px]">
             {listing.price}
           </p>
 
-          <p className="text-sm text-gray-600 line-clamp-3 flex-1">
+          <p className="text-sm text-gray-600 dark:text-gray-100 line-clamp-3 flex-1">
             {listing.description}
           </p>
           </div>
@@ -247,7 +247,7 @@ useEffect(() => {
           ) : addedItems[listing._id] ? (
             <button
              onClick={() => onViewCart?.()}
-              className="mt-2 w-full text-xs underline text-black hover:text-gray-700 cursor-pointer"
+              className="mt-2 w-full text-xs underline text-gray-600 dark:text-gray-100 hover:text-gray-700 cursor-pointer"
             >
               View cart
             </button>
@@ -267,8 +267,8 @@ useEffect(() => {
   );
   };
   return (
-    <div className="w-full max-w-4xl p-4  rounded-xl border">
-      <h3 className="mb-3 text-sm font-semibold text-gray-500">
+    <div className="w-full max-w-4xl p-4  mb-2 rounded-xl border ">
+      <h3 className="mb-3 text-sm font-semibold  text-gray-900 dark:text-gray-100">
         Featured Listings
       </h3>
   {style === "type1" ? renderType1() : renderType2()}

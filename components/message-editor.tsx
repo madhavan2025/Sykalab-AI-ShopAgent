@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { deleteTrailingMessages } from "@/app/(chat)/actions";
 import type { ChatMessage } from "@/lib/types";
 import { getTextFromMessage } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -56,12 +55,18 @@ export function MessageEditor({
   return (
     <div className="flex w-full flex-col gap-2">
       <Textarea
-        className="w-full resize-none overflow-hidden rounded-xl bg-transparent text-base! outline-hidden"
-        data-testid="message-editor"
-        onChange={handleInput}
-        ref={textareaRef}
-        value={draftContent}
-      />
+  className="
+    w-full resize-none overflow-hidden rounded-xl
+    bg-background
+    text-foreground
+    placeholder:text-muted-foreground
+    outline-none
+  "
+  data-testid="message-editor"
+  onChange={handleInput}
+  ref={textareaRef}
+  value={draftContent}
+/>
 
       <div className="flex flex-row justify-end gap-2">
         <Button

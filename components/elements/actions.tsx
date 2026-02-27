@@ -36,6 +36,8 @@ export const Action = ({
     <Button
       className={cn(
         "relative size-9 p-1.5 text-muted-foreground hover:text-foreground",
+        // ✅ Focus styles
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className
       )}
       size={size}

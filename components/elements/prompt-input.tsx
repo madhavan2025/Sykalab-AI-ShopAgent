@@ -78,11 +78,10 @@ export const PromptInputTextarea = forwardRef<
       <Textarea
         ref={ref}
         className={cn(
-          "w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0",
-          "bg-transparent",
-         
-          "placeholder:text-gray-500 dark:placeholder:text-gray-500",
-          disableAutoResize
+  "w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0",
+  "bg-transparent text-foreground",
+  "placeholder:text-muted-foreground",
+   disableAutoResize
             ? "field-sizing-fixed"
             : resizeOnNewLinesOnly
             ? "field-sizing-fixed"
