@@ -49,7 +49,7 @@ button.innerHTML = `
 
   const openChat = () => {
     if (!iframe.src) {
-      iframe.src = "https://sykasysbot.vercel.app//?embed=true";
+      iframe.src = "https://sykasysbot.vercel.app/?embed=true";
     }
     iframe.style.display = "block";
     isOpen = true;
